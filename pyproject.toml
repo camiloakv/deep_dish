@@ -1,0 +1,15 @@
+[project]
+name = "deep-dish"
+version = "0.1.0"
+description = "DL reference for TensorFlow and pyTorch"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "matplotlib>=3.10.8",
+    "numpy>=2.4.3",
+    "pandas>=3.0.1",
+    "scikit-learn>=1.8.0",
+    "tensorflow>=2.21.0",
+    "torch>=2.10.0",
+    "torchvision>=0.25.0",
+]
