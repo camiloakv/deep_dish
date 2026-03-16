@@ -3,17 +3,14 @@
 Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Scikit-learn, Tensorflow/Keras, and pyTorch.
 
 
-## Status
-
-Work (permanently) In Progress.
-
+## Progress
 
 | Case | Numpy | TensorFlow | Keras |
 |---|:---:|:---:|:---:|
-| Breast Cancer | X | X | X |
-| MNIST | X | O | X |
-| Convolutional | X | X | X |
-| LSTM | X | X | X |
+| Breast Cancer | - | - | - |
+| MNIST | - | X | - |
+| Convolutional | - | - | - |
+| LSTM | - | - | - |
 | LLM | - | - | - |
 
 
@@ -26,7 +23,7 @@ To quickly translate among libraries. Tags used for indexing.
 
 ### Use cases
 
-Naming standard: `[case_name]_[stack].ipynb`. Cases:
+Naming standard: `[case_name]_[library].ipynb`. Cases:
 
 - Breast Cancer: Standard prediction problem, simple network
 - MNIST: Standard prediction problem, simple network
