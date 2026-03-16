@@ -8,6 +8,16 @@ Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Sciki
 Work (permanently) In Progress.
 
 
+| Case | Numpy | TensorFlow | Keras |
+|---|:---:|:---:|:---:|
+| Breast Cancer | X | X | X |
+| MNIST | X | O | X |
+| Convolutional | X | X | X |
+| LSTM | X | X | X |
+| LLM | - | - | - |
+
+
+
 ## Contents
 
 ### Cheatsheet notebook
@@ -18,8 +28,11 @@ To quickly translate among libraries. Tags used for indexing.
 
 Naming standard: `[case_name]_[stack].ipynb`. Cases:
 
-- MNIST
-- some LLM
+- Breast Cancer: Standard prediction problem, simple network
+- MNIST: Standard prediction problem, simple network
+- Convolutional: (maybe cats and dogs)
+- LSTM: (maybe finance)
+- LLM: (maybe Dolma dataset)
 
 ## Due credits
 
@@ -27,3 +40,4 @@ Adapted from, inspired in, etc:
 
 - Numpy (manual/native python) implementation: Neural Networks and Deep Learning (Coursera course) - DeepLearning.AI
 - TensorFlow/Keras: Deep Learning with Python, Second Edition - François Chollet (2021)
+- pyTorch: [NeuralNine](https://www.youtube.com/@NeuralNine), [The Hundred-Page Language Models Book](https://www.thelmbook.com/)
