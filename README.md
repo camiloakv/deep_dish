@@ -16,7 +16,7 @@ To quickly translate among libraries. Tags used for indexing.
 
 ### Use cases
 
-Naming standard: `\[case_name\]_\[stack\].ipynb`. Cases:
+Naming standard: `[case_name]_[stack].ipynb`. Cases:
 
 - MNIST
 - some LLM
