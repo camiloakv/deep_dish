@@ -1,19 +1,39 @@
 # Standard parameters for equalization among libraries
 # main key is the case name
 
+cancer:
+  random_state: 42
+
+
 mnist:
   # overkill, these are standard, maybe they should be obtained from the dataset
   img_width: 28
   img_height: 28
 
+  layer1_out: 512
+
+  learning_rate: 0.001
   epochs: 5
   batch_size: 128
-  learning_rate: 0.001
-  layer1_out: 512
 
   # TODO
   random_state: 42
 
 
-cancer:
+lstm:
+  ticker: AAPL
+  date_start: '2020-01-01'
+  date_end: '2026-01-01'
+
+  seq_length: 30
+
+  input_dim: 1
+  hidden_dim: 32
+  num_layers: 2
+  output_dim: 1
+
+  learning_rate: 0.01
+  epochs: 200
+
+  # TODO
   random_state: 42
