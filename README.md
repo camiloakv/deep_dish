@@ -5,10 +5,10 @@ Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Sciki
 
 ## Progress
 
-| Case | Numpy | TensorFlow | Keras |
+| Case | Numpy | TensorFlow | pyTorch |
 |---|:---:|:---:|:---:|
-| Breast Cancer | - | - | - |
-| MNIST | - | X | - |
+| Breast Cancer | - | - | X |
+| MNIST | - | X | X |
 | Convolutional | - | - | - |
 | LSTM | - | - | - |
 | LLM | - | - | - |
