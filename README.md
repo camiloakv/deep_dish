@@ -9,8 +9,8 @@ Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Sciki
 |---|:---:|:---:|:---:|
 | Breast Cancer | - | - | X |
 | MNIST | - | X | X |
-| Convolutional | - | - | - |
-| LSTM | - | - | - |
+| LSTM | - | - | X |
+| CNN | - | - | - |
 | LLM | - | - | - |
 
 
@@ -27,9 +27,9 @@ Naming standard: `[case_name]_[library].ipynb`. Cases:
 
 - Breast Cancer: Standard prediction problem, simple network
 - MNIST: Standard prediction problem, simple network
-- Convolutional: (maybe cats and dogs)
-- LSTM: (maybe finance)
-- LLM: (maybe Dolma dataset)
+- LSTM: Stock price prediction
+- Convolutional: (cats and dogs or CIFAR10 dataset)
+- LLM: (Dolma dataset)
 
 ## Due credits
 
