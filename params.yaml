@@ -1,0 +1,19 @@
+# Standard parameters for equalization among libraries
+# main key is the case name
+
+mnist:
+  # overkill, these are standard, maybe they should be obtained from the dataset
+  img_width: 28
+  img_height: 28
+
+  epochs: 5
+  batch_size: 128
+  learning_rate: 0.001
+  layer1_out: 512
+
+  # TODO
+  random_state: 42
+
+
+cancer:
+  random_state: 42
