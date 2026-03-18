@@ -30,6 +30,48 @@ def plot_train_losses(n_epochs, losses, figsize=(12, 8), ls='.-') -> plt.Axes:
     return ax
 
 
+def plot_wrong_mnist(test_images, pred, real, neqs, img_width, img_height, nrows=12, ncols=10, figsize=(12, 12)):
+    """Plot misclassified MNIST digits as a grid of images.
+
+    Args:
+        test_images (np.ndarray): Array of test images. Shape (N, 784) or (N, 28, 28).
+        pred (np.ndarray): Predicted labels for all test images. Shape (N,).
+        real (np.ndarray): True labels for all test images. Shape (N,).
+        neqs (np.ndarray): Indices of misclassified examples where pred != real.
+        img_width (int): Width of each image (pixels), typically 28.
+        img_height (int): Height of each image (pixels), typically 28.
+        nrows (int, optional): Number of rows in the output plot grid. Default is 12.
+        ncols (int, optional): Number of columns in the output plot grid. Default is 10.
+        figsize (tuple, optional): Matplotlib figure size. Default is (12, 12).
+
+    Returns:
+        matplotlib.figure.Figure: Figure object containing the plotted misclassified images.
+
+    Notes:
+        - The function visualizes the first `nrows * ncols` misclassified instances.
+        - `test_images` is reshaped to (28, 28) for display.
+    """
+
+    fig, axs = plt.subplots(nrows=nrows, ncols=ncols, figsize=figsize)
+    axs = axs.flatten()
+
+    for i, ax in enumerate(axs):
+        idx = neqs[i]
+        ax.set_title(f"{pred[idx]} != {real[idx]}")
+        digit = test_images[idx]
+        digit = digit.reshape(img_width, img_height)
+        ax.imshow(digit, cmap=plt.cm.binary) #scmap="grays_r")  #
+        ax.set_xticklabels([])
+        ax.set_yticklabels([])
+        ax.set_xticks([])
+        ax.set_yticks([])
+
+    fig.suptitle(f"First {nrows * ncols} wrongly labeled instances (predicted != real)", fontsize=16)
+    fig.tight_layout()
+
+    return fig
+
+
 def plot_stock_prediction(y_test, y_test_pred, df, test_rmse, ticker_symbol="", figsize=(12, 8)) -> Figure:
 
     fig = plt.figure(figsize=figsize)
@@ -56,7 +98,3 @@ def plot_stock_prediction(y_test, y_test_pred, df, test_rmse, ticker_symbol="", 
     plt.show()
 
     return fig
-
-
-def plot_wrong_mnist():
-    return

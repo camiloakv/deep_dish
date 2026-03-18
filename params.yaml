@@ -17,7 +17,7 @@ mnist:
   batch_size: 128
 
   # TODO
-  random_state: 42
+  random_state: 42  # only for tf
 
 
 lstm:
