@@ -57,16 +57,16 @@ def plot_wrong_mnist(test_images, pred, real, neqs, img_width, img_height, nrows
 
     for i, ax in enumerate(axs):
         idx = neqs[i]
-        ax.set_title(f"{pred[idx]} != {real[idx]}")
+        ax.set_title(fr"{pred[idx]} $\neq$ {real[idx]}")
         digit = test_images[idx]
         digit = digit.reshape(img_width, img_height)
-        ax.imshow(digit, cmap=plt.cm.binary) #scmap="grays_r")  #
+        ax.imshow(digit, cmap="Blues_r")  #plt.cm.binary) #
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_xticks([])
         ax.set_yticks([])
 
-    fig.suptitle(f"First {nrows * ncols} wrongly labeled instances (predicted != real)", fontsize=16)
+    fig.suptitle(fr"First {nrows * ncols} wrongly labeled instances (predicted $\neq$ real)", fontsize=16)
     fig.tight_layout()
 
     return fig

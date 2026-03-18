@@ -23,7 +23,7 @@ To quickly translate among libraries. Tags used for indexing.
 
 ### Use cases
 
-Naming standard: `[case_name]_[library].ipynb`. Cases:
+Naming convention: `[case_name]_[library].ipynb`. Cases:
 
 - Breast Cancer: Standard prediction problem, simple network
 - MNIST: Standard prediction problem, simple network
@@ -35,6 +35,6 @@ Naming standard: `[case_name]_[library].ipynb`. Cases:
 
 Adapted from, inspired in, etc:
 
-- Numpy (manual/native python) implementation: Neural Networks and Deep Learning (Coursera course) - DeepLearning.AI
+- Numpy (manual/native python) implementation: [Neural Networks and Deep Learning](https://www.coursera.org/learn/neural-networks-deep-learning) - DeepLearning.AI
 - TensorFlow/Keras: Deep Learning with Python, Second Edition - François Chollet (2021)
 - pyTorch: [NeuralNine](https://www.youtube.com/@NeuralNine), [The Hundred-Page Language Models Book](https://www.thelmbook.com/)

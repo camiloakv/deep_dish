@@ -16,8 +16,7 @@ mnist:
   epochs: 5
   batch_size: 128
 
-  # TODO
-  random_state: 42  # only for tf
+  random_state: 42
 
 
 lstm:
