@@ -39,4 +39,21 @@ lstm:
 
 
 cnn:
+  num_workers: 2
+  batch_size: 32
   random_state: 42
+
+  # TODO: connect to model
+  ly_conv1_out: 12
+  ly_conv1_kernel: 5
+  ly_pool_kernel: 2
+  ly_conv2_out: 24
+  ly_conv2_kernel: 5
+  ly_fc1_out: 120
+  ly_fc2_out: 84
+
+  learning_rate: 0.001
+  momentum: 0.9
+  epochs: 30
+  model_file: "data/trained/cnn_cifar10.pth"
+

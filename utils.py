@@ -16,6 +16,26 @@ def print_params(params) -> None:
 #----------------
 # Plotting
 
+def imshow(arr, cmap=plt.cm.binary, figsize=(2, 2)) -> None:
+    """Wrapper for plt.imshow"""
+
+    _, ax = plt.subplots(1, 1, figsize=(2, 2))
+    if len(arr.shape) == 2:  # monochromatic
+        ax.imshow(arr, cmap=cmap)
+    elif len(arr.shape) == 3:  # RGB channels
+        ax.imshow(arr)
+    else:
+        print("Invalid shape")
+        return
+
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.set_xticks([])
+    ax.set_yticks([])
+
+    return
+
+
 def plot_train_losses(n_epochs, losses, figsize=(12, 8), ls='.-') -> plt.Axes:
 
     msg = f"Mismatch between number of epochs ({n_epochs}) and losses length ({len(losses)})"
