@@ -10,7 +10,7 @@ Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Sciki
 | Breast Cancer | - | - | X |
 | MNIST | - | X | X |
 | LSTM | - | - | X |
-| CNN | - | - | - |
+| CNN | - | - | X |
 | LLM | - | - | - |
 
 

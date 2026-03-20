@@ -79,8 +79,11 @@ def plot_wrong_mnist(test_images, pred, real, neqs, img_width, img_height, nrows
         idx = neqs[i]
         ax.set_title(fr"{pred[idx]} $\neq$ {real[idx]}")
         digit = test_images[idx]
-        digit = digit.reshape(img_width, img_height)
-        ax.imshow(digit, cmap="Blues_r")  #plt.cm.binary) #
+        if len(digit.shape) == 2:
+            digit = digit.reshape(img_width, img_height)
+            ax.imshow(digit, cmap="Blues_r")  #plt.cm.binary) #
+        elif len(digit.shape) == 3:
+            return  #TODO
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_xticks([])
