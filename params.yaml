@@ -6,7 +6,7 @@ cancer:
 
 
 mnist:
-  # overkill, these are standard, maybe they should be obtained from the dataset
+  # imposed by the dataset
   img_width: 28
   img_height: 28
 
@@ -39,6 +39,10 @@ lstm:
 
 
 cnn:
+  # imposed by the dataset
+  img_width: 32
+  img_height: 32
+
   num_workers: 2
   batch_size: 32
   random_state: 42
@@ -55,5 +59,7 @@ cnn:
   learning_rate: 0.001
   momentum: 0.9
   epochs: 30
+
+  train_loop: False  #train and save, or load weights from file
   model_file: "data/trained/cnn_cifar10.pth"
 

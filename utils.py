@@ -1,5 +1,6 @@
 # General purpose functions
 
+import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.figure import Figure
 
@@ -12,6 +13,22 @@ def print_params(params) -> None:
 
     return
 
+
+#TODO: as pytorch transform (should speed up); rename
+def image_array(tensor):
+    """Manual rescale and reshape
+
+    Args:
+        tensor (torch.Tensor): Values in range [-1., 1.], shape (3, width, height).
+
+    Returns:
+        numpy.array: Values in range [0, 255], shape (width, height, 3).
+    """
+
+    ret = ((tensor.numpy() + 1)  * 255. / 2.).astype(np.uint8)
+    ret = np.rollaxis(ret,0,3)
+
+    return ret
 
 #----------------
 # Plotting
@@ -50,18 +67,30 @@ def plot_train_losses(n_epochs, losses, figsize=(12, 8), ls='.-') -> plt.Axes:
     return ax
 
 
-def plot_wrong_mnist(test_images, pred, real, neqs, img_width, img_height, nrows=12, ncols=10, figsize=(12, 12)):
+def show_wrong_preds(
+        test_images,
+        real,
+        pred,
+        notequals,
+        img_width,
+        img_height,
+        nrows=12,
+        ncols=10,
+        start_idx=0,
+        figsize=(12, 12)
+    ):
     """Plot misclassified MNIST digits as a grid of images.
 
     Args:
         test_images (np.ndarray): Array of test images. Shape (N, 784) or (N, 28, 28).
-        pred (np.ndarray): Predicted labels for all test images. Shape (N,).
         real (np.ndarray): True labels for all test images. Shape (N,).
-        neqs (np.ndarray): Indices of misclassified examples where pred != real.
+        pred (np.ndarray): Predicted labels for all test images. Shape (N,).
+        notequals (np.ndarray): Indices of misclassified examples where real != pred.
         img_width (int): Width of each image (pixels), typically 28.
         img_height (int): Height of each image (pixels), typically 28.
         nrows (int, optional): Number of rows in the output plot grid. Default is 12.
         ncols (int, optional): Number of columns in the output plot grid. Default is 10.
+        start_idx (int, optional): First index on notequals to be considered. Default is 0.
         figsize (tuple, optional): Matplotlib figure size. Default is (12, 12).
 
     Returns:
@@ -76,20 +105,29 @@ def plot_wrong_mnist(test_images, pred, real, neqs, img_width, img_height, nrows
     axs = axs.flatten()
 
     for i, ax in enumerate(axs):
-        idx = neqs[i]
-        ax.set_title(fr"{pred[idx]} $\neq$ {real[idx]}")
+        idx = notequals[i + start_idx]
+        ax.set_title(fr"{real[idx]} $\neq$ {pred[idx]}")
         digit = test_images[idx]
-        if len(digit.shape) == 2:
+        # 1D: monochomatic array
+        if len(digit.shape) == 1:
             digit = digit.reshape(img_width, img_height)
             ax.imshow(digit, cmap="Blues_r")  #plt.cm.binary) #
+        # 2D: monochomatic matrix TODO: implementation
+        elif len(digit.shape) == 2:
+            digit = digit.reshape(img_width, img_height)
+            ax.imshow(digit, cmap="Blues_r")  #plt.cm.binary) #
+        # 3D: RGB matrix
         elif len(digit.shape) == 3:
-            return  #TODO
+            ax.imshow(digit)
+        else:
+            print(f"Shape {digit.shape} not implemented.")
+            return
         ax.set_xticklabels([])
         ax.set_yticklabels([])
         ax.set_xticks([])
         ax.set_yticks([])
 
-    fig.suptitle(fr"First {nrows * ncols} wrongly labeled instances (predicted $\neq$ real)", fontsize=16)
+    fig.suptitle(fr"Wrong predictions [{start_idx}: {start_idx + (nrows * ncols)}] (real $\neq$ predicted)", fontsize=16)
     fig.tight_layout()
 
     return fig
