@@ -10,13 +10,12 @@ mnist:
   img_width: 28
   img_height: 28
 
-  layer1_out: 512
-
+  random_state: 42
+  batch_size: 128
   learning_rate: 0.001
   epochs: 5
-  batch_size: 128
 
-  random_state: 42
+  ly_fc1_out: 512
 
 
 lstm:
@@ -24,28 +23,31 @@ lstm:
   date_start: '2020-01-01'
   date_end: '2026-01-01'
 
+  random_state: 42  # TODO
   seq_length: 30
+  learning_rate: 0.01
+  epochs: 200
 
   input_dim: 1
   hidden_dim: 32
   num_layers: 2
   output_dim: 1
 
-  learning_rate: 0.01
-  epochs: 200
-
-  # TODO
-  random_state: 42
-
 
 cnn:
+  train_loop: False  #train and save, or load weights from file
+  model_file: "data/trained/cnn_cifar10.pth"
+
   # imposed by the dataset
   img_width: 32
   img_height: 32
 
+  random_state: 42
   num_workers: 2
   batch_size: 32
-  random_state: 42
+  learning_rate: 0.001
+  momentum: 0.9
+  epochs: 30
 
   # TODO: connect to model
   ly_conv1_out: 12
@@ -55,11 +57,4 @@ cnn:
   ly_conv2_kernel: 5
   ly_fc1_out: 120
   ly_fc2_out: 84
-
-  learning_rate: 0.001
-  momentum: 0.9
-  epochs: 30
-
-  train_loop: False  #train and save, or load weights from file
-  model_file: "data/trained/cnn_cifar10.pth"
 
