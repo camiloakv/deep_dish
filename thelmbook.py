@@ -1,14 +1,44 @@
-# Copied from thelmbook (only the parts needed). Sources:
+# Copied from thelmbook.com. Source:
 # https://github.com/aburkov/theLMbook/blob/main/news_decoder_language_model.ipynb
 
-import os
+# Import required libraries
+import os               # For file and path operations (check_file_exists, extract_dataset)
 import urllib.request   # For downloading dataset files from URLs
 import tarfile          # For extracting .tar.gz dataset archives
 import random           # For setting random seeds
+from tqdm import tqdm   # For progress bars
+import math             # For computing perplexity using exp()
+import re               # For preprocessing text (replacing numbers with placeholders)
+##import tempfile         # For temporary file handling during extraction
+##import shutil           # For file operations during extraction
 
-import torch
-import torch.nn as nn
+import torch            # Main PyTorch library for tensor operations and deep learning
+import torch.nn as nn   # Neural network modules, layers, and utilities
+#import torch.nn.functional as F  # For softmax
 from torch.utils.data import DataLoader, IterableDataset  # For efficient data loading
+from transformers import AutoTokenizer  # For loading pre-trained tokenizer
+
+
+#
+#
+#
+#
+#import os
+#import urllib.request   # For downloading dataset files from URLs
+#import tarfile          # For extracting .tar.gz dataset archives
+#import random           # For setting random seeds
+#import re               # For preprocessing text (replacing numbers with placeholders)
+#
+#import torch
+#import torch.nn as nn
+#from torch.utils.data import DataLoader, IterableDataset  # For efficient data loading
+
+
+
+
+
+
+
 
 # ----------------------------
 # Utility Functions
@@ -297,6 +327,310 @@ def download_and_prepare_data(url, batch_size, tokenizer, max_length=30):
 
 
 # ----------------------------
+# Evaluation Functions
+# ----------------------------
+
+def compute_loss_and_perplexity(model, dataloader, tokenizer, criterion, device, max_sentences=1000):
+    """
+    Evaluates model performance by computing loss and perplexity on data.
+
+    Args:
+        model (nn.Module): The language model to evaluate
+        dataloader (DataLoader): Data loader containing batched sequences
+        tokenizer: Tokenizer for handling special tokens like padding
+        criterion: Loss function (usually CrossEntropyLoss)
+        device: Device to run computation on (cuda/cpu)
+        max_sentences (int): Maximum number of sentences to evaluate (default: 1000)
+                           Limits evaluation to a subset for faster validation
+
+    Returns:
+        tuple: (average_loss, perplexity, sentences_processed)
+               - average_loss: Mean loss per token (excluding padding)
+               - perplexity: exp(average_loss), lower is better
+    """
+    # Set model to evaluation mode (disables dropout, etc.)
+    model.eval()
+
+    # Initialize counters for loss calculation
+    total_loss = 0.0          # Accumulator for total loss across all batches
+    total_tokens = 0          # Counter for total number of tokens (excluding padding)
+    sentences_processed = 0    # Counter for number of sentences processed
+
+    # Disable gradient computation for efficiency
+    with torch.no_grad():
+        # Iterate through data with progress bar
+        for input_seq, target_seq in tqdm(dataloader, desc="Evaluating", leave=False):
+            # Move input and target sequences to specified device
+            input_seq = input_seq.to(device)      # Shape: (batch_size, seq_len)
+            target_seq = target_seq.to(device)    # Shape: (batch_size, seq_len)
+
+            # Get current batch size (might be smaller for last batch)
+            batch_size_current = input_seq.size(0)
+
+            # Forward pass through the model
+            logits = model(input_seq)             # Shape: (batch_size, seq_len, vocab_size)
+
+            # Reshape logits and target for loss calculation
+            logits = logits.reshape(-1, logits.size(-1))  # Shape: (batch_size * seq_len, vocab_size)
+            target = target_seq.reshape(-1)              # Shape: (batch_size * seq_len)
+
+            # Create mask to exclude padding tokens
+            mask = target != tokenizer.pad_token_id
+
+            # Compute loss only on non-padded tokens
+            loss = criterion(logits[mask], target[mask])
+
+            # Update counters
+            loss_value = loss.item() * mask.sum().item()  # Total loss for this batch
+            total_loss += loss_value                      # Accumulate batch loss
+            total_tokens += mask.sum().item()             # Count non-padding tokens
+
+            # Update sentence counter and check if we've reached maximum
+            sentences_processed += batch_size_current
+            if sentences_processed >= max_sentences:
+                break
+
+    # Calculate final metrics
+    average_loss = total_loss / total_tokens           # Normalize loss by number of tokens
+    perplexity = math.exp(average_loss)               # Convert loss to perplexity
+
+    return average_loss, perplexity
+
+def generate_text(model, start_string, tokenizer, device, max_length=50):
+    """
+    Generates text continuation from a given start string using greedy decoding.
+
+    Args:
+        model (nn.Module): Trained language model
+        start_string (str): Initial text to continue from
+        tokenizer: Tokenizer for text processing
+        device: Device to run generation on (cuda/cpu)
+        max_length (int): Maximum length of generated sequence
+
+    Returns:
+        str: Generated text continuation
+    """
+    # Set model to evaluation mode to disable dropout and other training-specific behaviors
+    model.eval()
+
+    # Convert input string to token indices
+    input_indices = tokenizer.encode(start_string, add_special_tokens=False)
+
+    # Convert indices to tensor and move to specified device (GPU/CPU)
+    input_tensor = torch.tensor([input_indices], dtype=torch.long).to(device)
+
+    # Keep track of all generated tokens, starting with input sequence
+    generated_indices = input_indices.copy()
+
+    # Generate tokens until we hit max length or end-of-sequence token
+    for _ in range(max_length - len(input_indices)):
+        # Get model predictions for the entire sequence
+        logits = model(input_tensor)
+        # Only take predictions for the last token position
+        logits = logits[:, -1, :]
+
+        # Prevent the model from generating unknown tokens by setting their probability to negative infinity
+        if tokenizer.unk_token_id is not None:
+            logits[:, tokenizer.unk_token_id] = float("-inf")
+
+        # Greedy decoding: select the token with highest probability
+        next_token = torch.argmax(logits, dim=-1)
+
+        # Add the chosen token to our generated sequence
+        generated_indices.append(next_token.item())
+
+        # If we generate an end-of-sequence token, stop generation
+        if next_token.item() == tokenizer.eos_token_id:
+            break
+
+        # Add the new token to input tensor for next iteration
+        input_tensor = torch.cat([input_tensor, next_token.unsqueeze(0)], dim=1)
+
+    # Convert token indices back to text, removing any special tokens
+    return tokenizer.decode(generated_indices, skip_special_tokens=True)
+
+def save_model(model, tokenizer, model_name):
+    """
+    Saves the model state dictionary and tokenizer using the specified model name.
+
+    Args:
+        model (nn.Module): The trained model to save
+        tokenizer: The tokenizer used with the model
+        model_name (str): Name to use for the saved model files
+    """
+    # Create the models directory if it doesn't exist
+    save_dir = os.path.join("models", model_name)
+    os.makedirs(save_dir, exist_ok=True)
+
+    # Save the model state dictionary and configuration
+    model_path = os.path.join(save_dir, f"{model_name}.pth")
+    torch.save({
+        "model_state_dict": model.state_dict(),
+        "model_config": {
+            "vocab_size": len(tokenizer),
+            "emb_dim": model.embedding.embedding_dim,
+            "num_heads": len(model.layers[0].attn.heads),
+            "num_blocks": len(model.layers),
+            "pad_idx": model.embedding.padding_idx
+        }
+    }, model_path)
+
+    # Save the tokenizer
+    tokenizer_path = os.path.join(save_dir, "tokenizer")
+    tokenizer.save_pretrained(tokenizer_path)
+
+    print(f"Model and tokenizer saved as '{model_name}'")
+
+def load_model(model_name, device=None):
+    """
+    Loads a saved model and tokenizer using the model name.
+
+    Args:
+        model_name (str): Name of the model to load
+        device: Device to load the model onto (if None, uses available device)
+
+    Returns:
+        tuple: (loaded_model, loaded_tokenizer)
+    """
+    if device is None:
+        device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    save_dir = os.path.join("models", model_name)
+
+    # Check if model exists
+    if not os.path.exists(save_dir):
+        raise FileNotFoundError(f"No saved model found with name '{model_name}'")
+
+    # Load the tokenizer
+    tokenizer_path = os.path.join(save_dir, "tokenizer")
+    tokenizer = AutoTokenizer.from_pretrained(tokenizer_path)
+
+    # Load the model state and config
+    model_path = os.path.join(save_dir, f"{model_name}.pth")
+    checkpoint = torch.load(model_path, map_location=device, weights_only=False)
+
+    # Create a new model instance with the saved configuration
+    model = DecoderLanguageModel(
+        vocab_size=checkpoint["model_config"]["vocab_size"],
+        emb_dim=checkpoint["model_config"]["emb_dim"],
+        num_heads=checkpoint["model_config"]["num_heads"],
+        num_blocks=checkpoint["model_config"]["num_blocks"],
+        pad_idx=checkpoint["model_config"]["pad_idx"]
+    )
+
+    # Load the saved state dictionary
+    model.load_state_dict(checkpoint["model_state_dict"])
+    model.to(device)
+    model.eval()
+
+    print(f"\nModel '{model_name}' loaded successfully")
+    return model, tokenizer
+
+# --------------------------------------------------------
+#Model Classes
+#Decoder Transformer language model classes and the initialization method:
+
+# ----------------------------
+# Weight Initialization and Core Functions
+# This section contains utility functions for weight initialization
+# and core computational functions used throughout the model
+# ----------------------------
+
+def initialize_weights(model):
+    """
+    NOTE: only DecoderLanguageModel
+    Initialize the weights of different model components using appropriate schemes.
+    Each layer type receives specialized initialization for optimal training.
+    """
+    for module in model.modules():
+#        if isinstance(module, nn.Linear):
+#            # Xavier uniform initialization for linear layers
+#            # Helps maintain variance across network layers
+#            nn.init.xavier_uniform_(module.weight)
+#            if module.bias is not None:
+#                nn.init.zeros_(module.bias)  # Initialize biases to zero
+#        elif isinstance(module, nn.Embedding):
+#            # Initialize embedding layers with normal distribution
+#            nn.init.normal_(module.weight, mean=0, std=0.02)
+#            if module.padding_idx is not None:
+#                # Ensure padding tokens have zero embeddings
+#                with torch.no_grad():
+#                    module.weight[module.padding_idx].fill_(0)
+#        elif isinstance(module, AttentionHead):
+#            # Initialize query, key, and value projection matrices
+#            # Xavier uniform helps maintain good gradient flow
+#            nn.init.xavier_uniform_(module.W_Q)
+#            nn.init.xavier_uniform_(module.W_K)
+#            nn.init.xavier_uniform_(module.W_V)
+#        elif isinstance(module, MultiHeadAttention):
+#            # Initialize output projection matrix for attention mechanism
+#            nn.init.xavier_uniform_(module.W_O)
+#        elif isinstance(module, DecoderLanguageModel):
+#            # Initialize final output projection layer
+#            nn.init.xavier_uniform_(module.output)
+#        elif isinstance(module, RMSNorm):
+#            # Initialize RMSNorm scale parameters to ones
+#            # This starts with identity transformation
+#            nn.init.ones_(module.scale)
+#        elif isinstance(module, MLP):
+#            # Initialize feed-forward network parameters
+#            nn.init.xavier_uniform_(module.W_1)
+#            nn.init.xavier_uniform_(module.W_2)
+#            nn.init.zeros_(module.B_1)
+#            nn.init.zeros_(module.B_2)
+
+        if isinstance(module, DecoderLanguageModel):
+            # Initialize final output projection layer
+            nn.init.xavier_uniform_(module.output)
+
+
+def rope(x, theta_base=10000.0):
+    """
+    Implements Rotary Position Embedding (RoPE) for transformer attention.
+    RoPE encodes position information through rotation matrices applied to pairs of dimensions.
+
+    Args:
+        x: Input tensor of shape (batch_size, seq_len, emb_dim)
+        theta_base: Base for computing rotation frequencies (default: 10000.0)
+
+    Returns:
+        Tensor with position information encoded through rotations
+    """
+    batch_size, seq_len, emb_dim = x.size()
+    assert emb_dim % 2 == 0, "Embedding dimensionality must be even for RoPE"
+
+    # Generate sequence position indices
+    pos = torch.arange(0, seq_len, dtype=torch.float32, device=x.device)
+    pos = pos.unsqueeze(0).expand(batch_size, seq_len)
+
+    # Compute frequency bands for each dimension pair
+    # Modified: frequencies start from p=1 and use (p-1) in exponent
+    p = torch.arange(1, emb_dim // 2 + 1, dtype=torch.float32, device=x.device)
+    theta_p = 1.0 / (theta_base ** (2 * (p - 1) / emb_dim))
+
+    # Compute rotation angles for each position and frequency
+    pos = pos.unsqueeze(-1)
+    theta = pos * theta_p
+
+    # Compute rotation components
+    sin_theta = torch.sin(theta)
+    cos_theta = torch.cos(theta)
+
+    # Split input into alternating dimensions
+    x1 = x[..., 0::2]  # Dimensions at indices 0,2,4,...
+    x2 = x[..., 1::2]  # Dimensions at indices 1,3,5,...
+
+    # Apply 2D rotations to each pair
+    x_rotated_1 = x1 * cos_theta - x2 * sin_theta
+    x_rotated_2 = x1 * sin_theta + x2 * cos_theta
+
+    # Recombine rotated pairs into final output
+    x_rotated = torch.stack((x_rotated_1, x_rotated_2), dim=-1).reshape(batch_size, seq_len, emb_dim)
+
+    return x_rotated
+
+
+# ----------------------------
 # Model Components
 # This section contains the building blocks of the transformer decoder
 # including normalization, attention, and feed-forward layers
@@ -461,57 +795,3 @@ class DecoderLanguageModel(nn.Module):
         return x @ self.output
 
 
-#---------------------------------------------------------------------------------
-
-# ----------------------------
-# Weight Initialization and Core Functions
-# This section contains utility functions for weight initialization
-# and core computational functions used throughout the model
-# ----------------------------
-
-def initialize_weights(model):
-    """
-    NOTE: only DecoderLanguageModel
-    Initialize the weights of different model components using appropriate schemes.
-    Each layer type receives specialized initialization for optimal training.
-    """
-    for module in model.modules():
-#        if isinstance(module, nn.Linear):
-#            # Xavier uniform initialization for linear layers
-#            # Helps maintain variance across network layers
-#            nn.init.xavier_uniform_(module.weight)
-#            if module.bias is not None:
-#                nn.init.zeros_(module.bias)  # Initialize biases to zero
-#        elif isinstance(module, nn.Embedding):
-#            # Initialize embedding layers with normal distribution
-#            nn.init.normal_(module.weight, mean=0, std=0.02)
-#            if module.padding_idx is not None:
-#                # Ensure padding tokens have zero embeddings
-#                with torch.no_grad():
-#                    module.weight[module.padding_idx].fill_(0)
-#        elif isinstance(module, AttentionHead):
-#            # Initialize query, key, and value projection matrices
-#            # Xavier uniform helps maintain good gradient flow
-#            nn.init.xavier_uniform_(module.W_Q)
-#            nn.init.xavier_uniform_(module.W_K)
-#            nn.init.xavier_uniform_(module.W_V)
-#        elif isinstance(module, MultiHeadAttention):
-#            # Initialize output projection matrix for attention mechanism
-#            nn.init.xavier_uniform_(module.W_O)
-#        elif isinstance(module, DecoderLanguageModel):
-#            # Initialize final output projection layer
-#            nn.init.xavier_uniform_(module.output)
-#        elif isinstance(module, RMSNorm):
-#            # Initialize RMSNorm scale parameters to ones
-#            # This starts with identity transformation
-#            nn.init.ones_(module.scale)
-#        elif isinstance(module, MLP):
-#            # Initialize feed-forward network parameters
-#            nn.init.xavier_uniform_(module.W_1)
-#            nn.init.xavier_uniform_(module.W_2)
-#            nn.init.zeros_(module.B_1)
-#            nn.init.zeros_(module.B_2)
-
-        if isinstance(module, DecoderLanguageModel):
-            # Initialize final output projection layer
-            nn.init.xavier_uniform_(module.output)

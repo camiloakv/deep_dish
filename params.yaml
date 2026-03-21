@@ -67,7 +67,7 @@ llm:
   emb_dim: 128
   num_heads: 8
   num_blocks: 2
-  batch_size: 128
-  learning_rate: 0.001
+  batch_size: 131072 #65536 #131072 (8589934592 bytes) #128
+  learning_rate: 0.001 #0.001
   num_epochs: 1
   context_size: 30
