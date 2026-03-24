@@ -65,9 +65,15 @@ llm:
   # TODO: standarize book -> repo names
   data_url: "https://www.thelmbook.com/data/news"
   emb_dim: 128
-  num_heads: 8
+  num_heads: 4 #8
   num_blocks: 2
-  batch_size: 131072 #65536 #131072 (8589934592 bytes) #128
+  # 2048 4096 8192 16384 32768 | 65536 131072 262144 524288
+  #4096 (10725605660 bytes)  * 5380 batches = 22036480
+  #8192 (30419156992 bytes)  * 2690 batches = 22036480
+  #16384 (60838313984 bytes) * 1345 batches = 22036480
+  #32768 (121676627968 bytes) * 673 batches = 22052864
+  #131072 (8589934592 bytes)  * 169 batches = 22151168
+  batch_size: 2048  #128
   learning_rate: 0.001 #0.001
   num_epochs: 1
   context_size: 30
