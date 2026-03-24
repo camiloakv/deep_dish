@@ -11,7 +11,7 @@ Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Sciki
 | MNIST | - | X | X |
 | LSTM | - | - | X |
 | CNN | - | - | X |
-| LLM | - | - | - |
+| LLM | - | - | X |
 
 
 

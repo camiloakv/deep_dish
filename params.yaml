@@ -16,6 +16,7 @@ mnist:
   epochs: 5
 
   ly_fc1_out: 512
+  # TODO: add activations (for np and tf)
 
 
 lstm:
