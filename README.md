@@ -3,15 +3,23 @@
 Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Scikit-learn, Tensorflow/Keras, and pyTorch.
 
 
+
+<p>
+<img src="https://img.shields.io/badge/Numpy-777BB4?style=flat&logo=numpy&logoColor=white"/>
+<img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow&logoColor=white"/>
+<img src="https://img.shields.io/badge/Keras-FF0000?style=flat&logo=keras&logoColor=white"/>
+<img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white"/>
+</p>
+
 ## Progress
 
-| Case | Numpy | TensorFlow | pyTorch |
+| Case | NumPy | TensorFlow | pyTorch |
 |---|:---:|:---:|:---:|
-| Breast Cancer | - | - | X |
-| MNIST | - | X | X |
-| LSTM | - | - | X |
-| CNN | - | - | X |
-| LLM | - | - | X |
+| Breast Cancer |   |   | X |
+| MNIST | . | X | X |
+| LSTM |   |   | X |
+| CNN |   |   | X |
+| LLM |   |   | X |
 
 
 
@@ -28,8 +36,8 @@ Naming convention: `[case_name]_[library].ipynb`. Cases:
 - Breast Cancer: Standard prediction problem, simple network
 - MNIST: Standard prediction problem, simple network
 - LSTM: Stock price prediction
-- Convolutional: (cats and dogs or CIFAR10 dataset)
-- LLM: (Dolma dataset)
+- Convolutional: CIFAR10 dataset (32x32 images for 10 classes)
+- LLM: Dolma10 dataset
 
 ## Due credits
 
