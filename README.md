@@ -1,9 +1,5 @@
 # DEEP DISH
 
-Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Scikit-learn, Tensorflow/Keras, and pyTorch.
-
-
-
 <p>
 <img src="https://img.shields.io/badge/Numpy-777BB4?style=flat&logo=numpy&logoColor=white"/>
 <img src="https://img.shields.io/badge/TensorFlow-FF6F00?style=flat&logo=tensorflow&logoColor=white"/>
@@ -11,16 +7,25 @@ Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Sciki
 <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white"/>
 </p>
 
+Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Scikit-learn, Tensorflow/Keras, and pyTorch.
+
+<!--💿❌❎✏️🏗️⛔
+-->
+
 ## Progress
 
 | Case | NumPy | TensorFlow | pyTorch |
 |---|:---:|:---:|:---:|
-| Breast Cancer |   |   | X |
-| MNIST | . | X | X |
-| LSTM |   |   | X |
-| CNN |   |   | X |
-| LLM |   |   | X |
+| Breast Cancer |   |   | ✅ |
+| MNIST | ⏸️ | ✅ | ✅ |
+| LSTM | ⛔ |   | ✅ |
+| CNN |  ⛔|   | ✅ |
+| LLM | ⛔ |   | ✅ |
 
+
+✅: Done
+⏸️: In progress
+⛔: Not doing
 
 
 ## Contents
