@@ -7,7 +7,7 @@
 <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat&logo=pytorch&logoColor=white"/>
 </p>
 
-Reference/cheatsheet for miscelaneous deep learning operations with Numpy, Scikit-learn, Tensorflow/Keras, and pyTorch.
+Reference/cheatsheet for miscelaneous deep learning tasks with Numpy, Scikit-learn, Tensorflow/Keras, and pyTorch.
 
 <!--💿❌❎✏️🏗️⛔
 -->
